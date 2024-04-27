@@ -1,5 +1,6 @@
 import Alpine from "alpinejs";
 
+// @ts-ignore
 window["Alpine"] = Alpine;
 const audioCtx = new AudioContext();
 
