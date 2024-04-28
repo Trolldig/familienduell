@@ -8,6 +8,22 @@ button {
   cursor: pointer;
 }
 
+a {
+  color: inherit;
+  text-decoration-style: dashed;
+  text-decoration-thickness: 0.08em;
+  text-decoration-color: #989898;
+
+  &:hover,
+  &:focus-visible {
+    text-decoration-color: currentColor;
+  }
+}
+
+ul {
+  list-style-type: "-\202F";
+}
+
 *,
 *::before,
 *::after {
@@ -39,6 +55,12 @@ button {
   font-size: 5cqi;
 }
 
+.monitor h1 {
+  font-size: 1em;
+  font-weight: normal;
+  margin: 0;
+}
+
 .ui {
   display: flex;
   flex-direction: column;
@@ -47,12 +69,6 @@ button {
   overflow: auto;
   scrollbar-width: thin;
   scrollbar-color: #909b08 transparent;
-}
-
-.ui h1 {
-  font-size: 1em;
-  font-weight: normal;
-  margin: 0;
 }
 
 .list {
@@ -117,6 +133,7 @@ button {
   color: #343434;
 }
 
+.fail-list li.active,
 .active {
   color: #909b08;
 }
