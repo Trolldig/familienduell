@@ -13,19 +13,22 @@
     <body>
         <div class="bg" x-data="$store.game">
             <div class="monitor">
-                <template x-for="(question, qIndex) in questions">
+                <template x-for="(question, qIndex) in questions" x-bind:key="question.id">
                     <div class="ui" x-show="qIndex === activeQuestion" x-data="question">
                         <h1 x-text="text"></h1>
                         <ul class="list">
-                            <template x-for="(answer, aIndex) in answers">
+                            <template x-for="(answer, aIndex) in answers" x-bind:key="answer.id">
                                 <li class="word" x-data="answer">
                                     <button class="reveal" aria-label="reveal" @click="reveal"></button>
                                     <span class="number" x-reveal="{ text: aIndex + 1, delay: 0 }"></span>
                                     <span class="word" x-reveal="{ text, delay: 2 }"></span>
-                                    <span class="points" x-reveal="{ text: pts, delay: 33 }"></span>
+                                    <span class="points" x-reveal="{ text: pts, delay: 43 }"></span>
                                 </li>
                             </template>
                         </ul>
+                        <div class="points-overview">
+                            <span x-reveal="{ text: pointsToWinAsString, delay: 45 }"></span>
+                        </div>
                         <div class="controls left" x-data="fails.teamA">
                             <ul class="list fail-list">
                                 <li x-bind:class="failCount >= 1 ? 'active' : ''">X</li>

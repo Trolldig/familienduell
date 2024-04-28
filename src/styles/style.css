@@ -52,7 +52,7 @@ ul {
   font-family: "VT323", Courier, monospace;
   text-transform: uppercase;
   color: #909b08;
-  font-size: 5cqi;
+  font-size: 4cqi;
 }
 
 .monitor h1 {
@@ -65,6 +65,7 @@ ul {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  align-items: center;
   height: 100%;
   overflow: auto;
   scrollbar-width: thin;
@@ -148,4 +149,14 @@ ul {
 .increase.right {
   left: unset;
   right: -2.5vmin;
+}
+
+.points-overview {
+  padding: 1vmin 1vmin;
+  background: #909b08;
+  color: #121212;
+  display: flex;
+  justify-content: space-evenly;
+  width: 100%;
+  white-space: pre;
 }

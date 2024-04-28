@@ -1,7 +1,8 @@
 import { playAudio } from "./audio";
+import { getStateId } from "./stateIdGenerator";
 
-function answer(solution: string, points: number) {
-    const placeholder = "______________________________";
+function buildAnswer(solution: string, points: number) {
+    const placeholder = "_________________________________________";
     const maxLength = placeholder.length;
     let trimmedSolution = placeholder;
 
@@ -14,16 +15,19 @@ function answer(solution: string, points: number) {
     let trimmedPoints = points < 10 ? "0" + points.toString() : points.toString();
 
     return {
-        solution: trimmedSolution,
+        id: getStateId("answer"),
+        solution,
+        trimmedSolution,
         points,
         open: false,
         get text() {
-            return this.open ? this.solution : placeholder;
+            return this.open ? this.trimmedSolution : placeholder;
         },
         get pts() {
             return this.open ? trimmedPoints : "**";
         },
         async reveal() {
+            (this as unknown as ReturnType<typeof buildQuestion>).addPoints(this.open ? this.points * -1 : this.points);
             this.open = !this.open;
             await playAudio("reveal.mp3");
         },
@@ -33,8 +37,9 @@ function answer(solution: string, points: number) {
     }
 }
 
-function failsCount() {
+function buildFailsCount() {
     return {
+        id: getStateId("fails"),
         failCount: 0,
         async increase() {
             this.failCount = (this.failCount + 1) > 3 ? 0 : this.failCount + 1;
@@ -43,14 +48,30 @@ function failsCount() {
     }
 }
 
-function question(extend: { text: string, answers: ReturnType<typeof answer>[] }) {
+function buildQuestion(extend: { text: string, answers: ReturnType<typeof buildAnswer>[] }) {
     return {
+        id: getStateId("question"),
         ...extend,
         fails: {
-            teamA: failsCount(),
-            teamB: failsCount()
+            teamA: buildFailsCount(),
+            teamB: buildFailsCount()
+        },
+        get maximumPoints(): number {
+            return this.answers.reduce((accumulator, { points }) => accumulator + points, 0);
+        },
+        pointsToWin: 0,
+        get pointsToWinAsString(): string {
+            const maxLength = this.maximumPoints.toString().length;
+            const pointsToWinLength = this.pointsToWin.toString().length;
+            const prefix = "0";
+
+            return prefix.repeat(maxLength - pointsToWinLength) + this.pointsToWin.toString();
+        },
+        addPoints(amount: number) {
+            this.pointsToWin = this.pointsToWin + amount;
         },
         clear() {
+            this.pointsToWin = 0;
             this.answers.forEach(answer => {
                 answer.reset();
             });
@@ -61,27 +82,44 @@ function question(extend: { text: string, answers: ReturnType<typeof answer>[] }
     }
 }
 
+function buildTeam(name: string) {
+    return {
+        id: getStateId("team"),
+        name,
+        points: 0,
+        addPoints(amount: number) {
+            this.points = this.points + amount;
+        }
+    }
+}
+
 export function buildGameState() {
     return () => ({
+        id: getStateId("game"),
         activeQuestion: 0,
+        teams: [
+            buildTeam("Schiller"),
+            buildTeam("Goethe"),
+            buildTeam("Heine")
+        ],
         questions: [
-            question({
+            buildQuestion({
                 text: "Nennen Sie ein Fortbewegungsmittel ohne Räder",
                 answers: [
-                    answer("Boot", 50),
-                    answer("Helikopter", 30),
-                    answer("Schlitten", 20),
-                    answer("Pferd", 10),
-                    answer("Jetpack mit Raketenantrieb mit Festbrennstoff", 5)
+                    buildAnswer("Boot", 99),
+                    buildAnswer("Helikopter", 98),
+                    buildAnswer("Schlitten", 97),
+                    buildAnswer("Pferd", 96),
+                    buildAnswer("Jetpack mit Raketenantrieb mit Festbrennstoff", 95)
                 ],
             }),
-            question({
+            buildQuestion({
                 text: "Nennen Sie etwas, das man im Homeoffice tut",
                 answers: [
-                    answer("Schlafen", 45),
-                    answer("Arbeiten", 30),
-                    answer("Ohne Hose rumlaufen", 25),
-                    answer("Wäsche machen / Putzen", 13)
+                    buildAnswer("Schlafen", 45),
+                    buildAnswer("Arbeiten", 30),
+                    buildAnswer("Ohne Hose rumlaufen", 25),
+                    buildAnswer("Wäsche machen / Putzen", 13)
                 ],
             }),
         ],
