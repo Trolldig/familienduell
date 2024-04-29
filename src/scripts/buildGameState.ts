@@ -1,6 +1,6 @@
 import { playAudio } from "./audio";
 import { getStateId } from "./stateIdGenerator";
-import { DynamicAnswerState, DynamicFailState, DynamicGameState, DynamicQuestionState, DynamicTeamState, StorableAnswerState, StorableFailState, StorableGameState, StorableQuestionState, StorableTeamState } from "./types";
+import type { DynamicAnswerState, DynamicFailState, DynamicGameState, DynamicQuestionState, DynamicTeamState, StorableAnswerState, StorableFailState, StorableGameState, StorableQuestionState, StorableTeamState } from "./types";
 
 function buildAnswer(answer: StorableAnswerState): DynamicAnswerState {
     const placeholder = "_________________________________________";
@@ -117,71 +117,73 @@ function buildGameStateFromJSON(inputState: StorableGameState): DynamicGameState
     }
 }
 
-export function getGameState(id: string = "currentGameState"): () => DynamicGameState {
-    return () => {
-        const savedState = loadGameStateFromStorage(id);
-
-        if (savedState !== null) {
-            try {
-                return buildGameStateFromJSON(savedState);
-            } catch (e) {
-                console.error("rebuilding dynamic game state from localStorage failed", e);
-            }
-        }
-
-        console.log("building a new game state");
-        return buildGameStateFromJSON({
-            id: getStateId("game"),
-            activeQuestion: 0,
-            teams: [
-                { id: getStateId("team"), name: "Schiller", points: 0 },
-                { id: getStateId("team"), name: "Goethe", points: 0 },
-                { id: getStateId("team"), name: "Heine", points: 0 }
-            ],
-            questions: [
-                {
-                    id: getStateId("question"),
-                    text: "Nennen Sie ein Fortbewegungsmittel ohne Räder",
-                    fails: {
-                        teamA: {
-                            id: getStateId("fail"),
-                            failCount: 0
-                        },
-                        teamB: {
-                            id: getStateId("fail"),
-                            failCount: 0
-                        }
+function buildDefaultGameState(): DynamicGameState {
+    return buildGameStateFromJSON({
+        id: getStateId("game"),
+        activeQuestion: 0,
+        teams: [
+            { id: getStateId("team"), name: "Schiller", points: 0 },
+            { id: getStateId("team"), name: "Goethe", points: 0 },
+            { id: getStateId("team"), name: "Heine", points: 0 }
+        ],
+        questions: [
+            {
+                id: getStateId("question"),
+                text: "Nennen Sie ein Fortbewegungsmittel ohne Räder",
+                fails: {
+                    teamA: {
+                        id: getStateId("fail"),
+                        failCount: 0
                     },
-                    answers: [
-                        { id: getStateId("answer"), solution: "Boot", points: 99, open: false },
-                        { id: getStateId("answer"), solution: "Helikopter", points: 89, open: false },
-                        { id: getStateId("answer"), solution: "Schlitten", points: 79, open: false },
-                        { id: getStateId("answer"), solution: "Pferd", points: 69, open: true },
-                        { id: getStateId("answer"), solution: "Jetpack mit Festbrennstoffraketen-Antrieb", points: 59, open: false }
-                    ]
+                    teamB: {
+                        id: getStateId("fail"),
+                        failCount: 0
+                    }
                 },
-                {
-                    id: getStateId("question"),
-                    text: "Nennen Sie etwas, das man im Homeoffice tut",
-                    fails: {
-                        teamA: {
-                            id: getStateId("fail"),
-                            failCount: 0
-                        },
-                        teamB: {
-                            id: getStateId("fail"),
-                            failCount: 0
-                        }
+                answers: [
+                    { id: getStateId("answer"), solution: "Boot", points: 99, open: false },
+                    { id: getStateId("answer"), solution: "Helikopter", points: 89, open: false },
+                    { id: getStateId("answer"), solution: "Schlitten", points: 79, open: false },
+                    { id: getStateId("answer"), solution: "Pferd", points: 69, open: true },
+                    { id: getStateId("answer"), solution: "Jetpack mit Festbrennstoffraketen-Antrieb", points: 59, open: false }
+                ]
+            },
+            {
+                id: getStateId("question"),
+                text: "Nennen Sie etwas, das man im Homeoffice tut",
+                fails: {
+                    teamA: {
+                        id: getStateId("fail"),
+                        failCount: 0
                     },
-                    answers: [
-                        { id: getStateId("answer"), solution: "Schlafen", points: 60, open: false },
-                        { id: getStateId("answer"), solution: "Arbeiten", points: 51, open: false },
-                        { id: getStateId("answer"), solution: "Ohne Hose rumlaufen", points: 42, open: false },
-                        { id: getStateId("answer"), solution: "Pferd", points: 33, open: false },
-                        { id: getStateId("answer"), solution: "Wäsche machen / Putzen", points: 24, open: false }
-                    ]
-                }
-            ]
-        });
-    };
+                    teamB: {
+                        id: getStateId("fail"),
+                        failCount: 0
+                    }
+                },
+                answers: [
+                    { id: getStateId("answer"), solution: "Schlafen", points: 60, open: false },
+                    { id: getStateId("answer"), solution: "Arbeiten", points: 51, open: false },
+                    { id: getStateId("answer"), solution: "Ohne Hose rumlaufen", points: 42, open: false },
+                    { id: getStateId("answer"), solution: "Pferd", points: 33, open: false },
+                    { id: getStateId("answer"), solution: "Wäsche machen / Putzen", points: 24, open: false }
+                ]
+            }
+        ]
+    });
+}
+
+export function getGameState(id: string = "currentGameState"): DynamicGameState {
+    const savedState = loadGameStateFromStorage(id);
+    let dynamicState = buildDefaultGameState();
+
+    if (savedState !== null) {
+        try {
+            dynamicState = buildGameStateFromJSON(savedState);
+        } catch (e) {
+            console.error("rebuilding dynamic game state from localStorage failed, using default game state", e);
+        }
+    }
+
+    return dynamicState;
 }
