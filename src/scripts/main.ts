@@ -7,6 +7,6 @@ window["Alpine"] = Alpine;
 
 Alpine.directive("reveal", revealDirective);
 
-initGameState("gameState");
+initGameState();
 
 Alpine.start();

@@ -193,7 +193,7 @@ function getGameState(id: string): DynamicGameState {
     return dynamicState;
 }
 
-export function initGameState(id: string = "gameState") {
+export function initGameState(id: string = "game") {
     const state = getGameState(id);
     Alpine.store(id, state);
     Alpine.effect(() => {
