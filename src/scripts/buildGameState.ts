@@ -102,8 +102,8 @@ function loadGameStateFromStorage(id: string): StorableGameState | null {
     }
 }
 
-function saveGameStateToStorage(id: string, state: string) {
-    localStorage.setItem(id, state);
+function saveGameStateToStorage(id: string, state: DynamicGameState) {
+    localStorage.setItem(id, JSON.stringify(state));
 }
 
 function buildGameStateFromJSON(inputState: StorableGameState): DynamicGameState {
@@ -197,6 +197,6 @@ export function initGameState(id: string = "game") {
     const state = getGameState(id);
     Alpine.store(id, state);
     Alpine.effect(() => {
-        saveGameStateToStorage(id, JSON.stringify(Alpine.store(id)));
+        saveGameStateToStorage(id, Alpine.store(id) as DynamicGameState);
     })
 }
