@@ -1,6 +1,6 @@
 import Alpine from "alpinejs";
 import { revealDirective } from "./reveal-directive";
-import { initGameState } from "./buildGameState";
+import { initGameState } from "./gameState";
 
 // @ts-ignore
 window["Alpine"] = Alpine;
