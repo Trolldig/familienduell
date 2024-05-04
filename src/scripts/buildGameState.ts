@@ -180,23 +180,100 @@ function buildDefaultGameState(): DynamicGameState {
 
 function getGameState(id: string): DynamicGameState {
     const savedState = loadGameStateFromStorage(id);
-    let dynamicState = buildDefaultGameState();
+    let dynamicState;
 
     if (savedState !== null) {
         try {
             dynamicState = buildGameStateFromJSON(savedState);
         } catch (e) {
             console.error("rebuilding dynamic game state from localStorage failed, using default game state", e);
+            dynamicState = buildDefaultGameState();
         }
+    } else {
+        dynamicState = buildDefaultGameState();
     }
 
     return dynamicState;
 }
 
+function deepMergeGameState<T = StorableGameState | DynamicGameState>(base: T, merger: T): T {
+    if (typeof merger === "undefined") {
+        return base;
+    }
+
+    if (typeof base !== typeof merger) {
+        return merger;
+    }
+
+    if (["boolean", "number", "bigint", "string", "symbol"].includes(typeof merger)) {
+        return merger;
+    }
+
+    if (typeof merger === "function") {
+        return base;
+    }
+
+    if ((Array.isArray(base) && !Array.isArray(merger)) || (!Array.isArray(base) && Array.isArray(merger))) {
+        return merger;
+    }
+
+    if (Array.isArray(base) && Array.isArray(merger)) {
+        for (let i = 0; i < Math.max(base.length, merger.length); i++) {
+            if (base.length <= i) {
+                base.push(merger[i]);
+            } else {
+                base[i] = deepMergeGameState(base[i], merger[i]);
+            }
+        }
+
+        return base;
+    }
+
+    if (base === null || merger === null) {
+        return merger;
+    }
+
+    if (typeof base === "object" && typeof merger === "object") {
+        const keys = new Set([...Object.keys(base), ...Object.keys(merger)]);
+
+        for (let key of keys.values()) {
+            if (!Object.prototype.hasOwnProperty.call(base, key)) {
+                (base as Record<string, unknown>)[key] = (merger as Record<string, unknown>)[key];
+            } else {
+                const keyProperties = Object.getOwnPropertyDescriptor(base, key)
+                if (keyProperties?.writable === true || typeof keyProperties?.set === "function") {
+                    (base as Record<string, unknown>)[key] = deepMergeGameState((base as Record<string, unknown>)[key], (merger as Record<string, unknown>)[key])
+                }
+            }
+        }
+
+        return base;
+    }
+
+    return merger;
+}
+
 export function initGameState(id: string = "game") {
-    const state = getGameState(id);
+    let state = Alpine.reactive(getGameState(id));
     Alpine.store(id, state);
     Alpine.effect(() => {
-        saveGameStateToStorage(id, Alpine.store(id) as DynamicGameState);
-    })
+        const storedState = Alpine.store(id) as DynamicGameState;
+        saveGameStateToStorage(id, storedState);
+    });
+    window.addEventListener("storage", ({ key, oldValue, newValue }) => {
+        if (key !== id) {
+            return;
+        }
+
+        if (oldValue === newValue) {
+            return;
+        }
+
+        if (newValue === null) {
+            return;
+        }
+
+        const newState = deepMergeGameState(state, JSON.parse(newValue));
+        console.log(newState);
+    });
 }
