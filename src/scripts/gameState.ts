@@ -2,6 +2,7 @@ import { playAudio } from "./audio";
 import { getStateId } from "./stateIdGenerator";
 import Alpine from "alpinejs";
 import type { DynamicAnswerState, DynamicFailState, DynamicGameState, DynamicQuestionState, DynamicTeamState, StorableAnswerState, StorableFailState, StorableGameState, StorableQuestionState, StorableTeamState } from "./types";
+import { storage } from "./storage";
 
 function buildAnswer(answer: StorableAnswerState): DynamicAnswerState {
     const placeholder = "_________________________________________";
@@ -91,7 +92,7 @@ function buildTeam(team: StorableTeamState): DynamicTeamState {
 }
 
 function loadGameStateFromStorage(id: string): StorableGameState | null {
-    const savedValue = localStorage.getItem(id);
+    const savedValue = storage.getItem(id);
 
     try {
         return JSON.parse(savedValue as string);
@@ -103,7 +104,7 @@ function loadGameStateFromStorage(id: string): StorableGameState | null {
 }
 
 function saveGameStateToStorage(id: string, state: DynamicGameState) {
-    localStorage.setItem(id, JSON.stringify(state));
+    storage.setItem(id, JSON.stringify(state));
 }
 
 function buildGameStateFromJSON(inputState: StorableGameState): DynamicGameState {
@@ -260,7 +261,7 @@ export function initGameState(id: string = "game") {
         const storedState = Alpine.store(id) as DynamicGameState;
         saveGameStateToStorage(id, storedState);
     });
-    window.addEventListener("storage", ({ key, oldValue, newValue }) => {
+    storage.listen(id, ({ key, oldValue, newValue }) => {
         if (key !== id) {
             return;
         }
