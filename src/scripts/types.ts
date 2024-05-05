@@ -73,4 +73,5 @@ export interface DynamicGameState extends StorableGameState {
     prevQuestion(): void;
     nextQuestion(): void;
     getById<T extends WithID>(id: WithID["id"]): T | undefined;
+    changeView(view: this["currentView"]): void;
 }

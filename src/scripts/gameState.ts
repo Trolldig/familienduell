@@ -179,7 +179,10 @@ function buildGameStateFromJSON(inputState: StorableGameState): DynamicGameState
         },
         getById<T extends WithID>(id: T["id"]): T | undefined {
             return findInGameState(this as unknown as T, id);
-        }
+        },
+        changeView(view) {
+            this.currentView = view;
+        },
     }
 }
 
