@@ -12,7 +12,7 @@
 
     <body>
         <div class="bg" x-data="$store.game">
-            <div class="monitor">
+            <div class="monitor" x-show="currentView === 'questions'">
                 <template x-for="(question, qIndex) in questions" x-bind:key="question.id">
                     <div class="ui" x-show="qIndex === activeQuestion" x-data="question">
                         <h1 x-text="text"></h1>
@@ -55,6 +55,20 @@
                         </div>
                     </div>
                 </template>
+            </div>
+            <div class="monitor" x-show="currentView === 'highscore'">
+                <div class="ui">
+                    <h1>Highscore</h1>
+                    <ul class="list">
+                        <template x-for="(team, teamIndex) in ranking" x-bind:key="team.id">
+                            <li class="word" x-data="team">
+                                <span class="number" x-reveal="{ text: teamIndex + 1, delay: 0 }"></span>
+                                <span class="word" x-reveal="{ text: highscoreName, delay: 2 }"></span>
+                                <span class="points" x-reveal="{ text: pts, delay: 43 }"></span>
+                            </li>
+                        </template>
+                    </ul>
+                </div>
             </div>
         </div>
         <script type="module" src="/src/scripts/main.ts"></script>

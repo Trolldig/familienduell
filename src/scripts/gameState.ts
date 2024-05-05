@@ -89,6 +89,8 @@ function buildQuestion(question: StorableQuestionState): DynamicQuestionState {
 }
 
 function buildTeam(team: StorableTeamState): DynamicTeamState {
+    const placeholder = "________________________________________";
+
     return {
         ...team,
         get pts() {
@@ -100,6 +102,18 @@ function buildTeam(team: StorableTeamState): DynamicTeamState {
             const prefix = "0";
 
             return prefix.repeat(highestPointsLength - teamPointsLength) + this.points.toString();
+        },
+        get highscoreName() {
+            let trimmedName = placeholder;
+            const maxLength = placeholder.length;
+
+            if (this.name.length > maxLength - 1) {
+                trimmedName = this.name.substring(0, maxLength);
+            } else {
+                trimmedName = this.name + " " + placeholder.substring(this.name.length + 1);
+            }
+
+            return trimmedName;
         },
         addPoints(amount: number) {
             this.points = this.points + amount;
@@ -175,6 +189,7 @@ function buildDefaultGameState(): DynamicGameState {
     const teamCId = getStateId("team");
     return buildGameStateFromJSON({
         id: getStateId("game"),
+        currentView: "questions",
         activeQuestion: 0,
         teams: [
             { id: teamAId, name: "Schiller", points: 0 },

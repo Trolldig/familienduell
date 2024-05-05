@@ -9,6 +9,7 @@ export interface StorableTeamState extends WithID {
 
 export interface DynamicTeamState extends StorableTeamState {
     readonly pts: string;
+    readonly highscoreName: string;
     addPoints(amount: number): void;
 }
 
@@ -60,6 +61,7 @@ export interface DynamicQuestionState extends StorableQuestionState {
 }
 
 export interface StorableGameState extends WithID {
+    currentView: "questions" | "highscore";
     activeQuestion: number;
     teams: StorableTeamState[];
     questions: StorableQuestionState[];
