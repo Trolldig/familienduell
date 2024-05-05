@@ -40,7 +40,9 @@ export interface StorableQuestionState extends WithID {
     fails: {
         teamA: StorableFailState;
         teamB: StorableFailState;
-    },
+    };
+    _teamA: WithID["id"];
+    _teamB: WithID["id"];
 }
 
 export interface DynamicQuestionState extends StorableQuestionState {
@@ -48,9 +50,11 @@ export interface DynamicQuestionState extends StorableQuestionState {
     fails: {
         teamA: DynamicFailState;
         teamB: DynamicFailState;
-    }
+    };
     readonly pointsToWin: number;
     readonly maximumPoints: number;
+    readonly teamA?: DynamicTeamState;
+    readonly teamB?: DynamicTeamState;
     clear(): void;
 }
 

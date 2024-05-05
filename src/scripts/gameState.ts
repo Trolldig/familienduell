@@ -71,6 +71,12 @@ function buildQuestion(question: StorableQuestionState): DynamicQuestionState {
 
             return prefix.repeat(maxLength - pointsToWinLength) + this.pointsToWin.toString();
         },
+        get teamA() {
+            return state.getById?.<DynamicTeamState>(this._teamA);
+        },
+        get teamB() {
+            return state.getById?.<DynamicTeamState>(this._teamB);
+        },
         clear() {
             this.answers.forEach(answer => {
                 answer.reset();
@@ -107,6 +113,30 @@ function saveGameStateToStorage(id: string, state: DynamicGameState) {
     storage.setItem(id, JSON.stringify(state));
 }
 
+function findInGameState<T extends WithID>(haystack: T, needle: T["id"]): T | undefined {
+    if (haystack.id === needle) {
+        return haystack;
+    }
+
+    for (const value of Object.values(haystack) as (T | T[])[]) {
+        let result;
+
+        if (Array.isArray(value)) {
+            result = value.find((arrEl) => {
+                return findInGameState(arrEl, needle);
+            })
+        } else if (typeof value === "object") {
+            result = findInGameState(value, needle);
+        }
+
+        if (result) {
+            return result;
+        }
+    }
+
+    return undefined;
+}
+
 function buildGameStateFromJSON(inputState: StorableGameState): DynamicGameState {
     return {
         ...inputState,
@@ -121,43 +151,22 @@ function buildGameStateFromJSON(inputState: StorableGameState): DynamicGameState
             this.activeQuestion = this.activeQuestion >= this.questions.length - 1 ? this.questions.length - 1 : this.activeQuestion + 1;
         },
         getById<T extends WithID>(id: T["id"]): T | undefined {
-            const find = (haystack: T, needle: T["id"]): T | undefined => {
-                if (haystack.id === needle) {
-                    return haystack;
-                }
-
-                for (const value of Object.values(haystack) as (T | T[])[]) {
-                    let result;
-
-                    if (Array.isArray(value)) {
-                        result = value.find((arrEl) => {
-                            return find(arrEl, id);
-                        })
-                    } else if (typeof value === "object") {
-                        result = find(value, id);
-                    }
-
-                    if (result) {
-                        return result;
-                    }
-                }
-
-                return undefined;
-            }
-
-            return find(this as unknown as T, id);
+            return findInGameState(this as unknown as T, id);
         }
     }
 }
 
 function buildDefaultGameState(): DynamicGameState {
+    const teamAId = getStateId("team");
+    const teamBId = getStateId("team");
+    const teamCId = getStateId("team");
     return buildGameStateFromJSON({
         id: getStateId("game"),
         activeQuestion: 0,
         teams: [
-            { id: getStateId("team"), name: "Schiller", points: 0 },
-            { id: getStateId("team"), name: "Goethe", points: 0 },
-            { id: getStateId("team"), name: "Heine", points: 0 }
+            { id: teamAId, name: "Schiller", points: 0 },
+            { id: teamBId, name: "Goethe", points: 0 },
+            { id: teamCId, name: "Heine", points: 0 }
         ],
         questions: [
             {
@@ -173,6 +182,8 @@ function buildDefaultGameState(): DynamicGameState {
                         failCount: 0
                     }
                 },
+                _teamA: teamAId,
+                _teamB: teamBId,
                 answers: [
                     { id: getStateId("answer"), solution: "Boot", points: 99, open: false },
                     { id: getStateId("answer"), solution: "Helikopter", points: 89, open: false },
@@ -194,6 +205,8 @@ function buildDefaultGameState(): DynamicGameState {
                         failCount: 0
                     }
                 },
+                _teamA: teamAId,
+                _teamB: teamBId,
                 answers: [
                     { id: getStateId("answer"), solution: "Schlafen", points: 60, open: false },
                     { id: getStateId("answer"), solution: "Arbeiten", points: 51, open: false },
@@ -281,8 +294,10 @@ function deepMergeGameState<T = StorableGameState | DynamicGameState>(base: T, m
     return merger;
 }
 
+let state: DynamicGameState;
+
 export function initGameState(id: string = "game") {
-    let state = Alpine.reactive(getGameState(id));
+    state = Alpine.reactive(getGameState(id));
     Alpine.store(id, state);
     Alpine.effect(() => {
         const storedState = Alpine.store(id) as DynamicGameState;
@@ -304,4 +319,6 @@ export function initGameState(id: string = "game") {
         const newState = deepMergeGameState(state, JSON.parse(newValue));
         console.log(newState);
     });
+
+    window["state"] = state;
 }
