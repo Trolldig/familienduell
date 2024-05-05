@@ -44,8 +44,11 @@ function buildFailsCount(failsCount: StorableFailState): DynamicFailState {
     return {
         ...failsCount,
         async increase() {
-            this.failCount = (this.failCount + 1) > 3 ? 0 : this.failCount + 1;
+            this.failCount = Math.min((this.failCount + 1), 3);
             await playAudio("fail.mp3");
+        },
+        decrease() {
+            this.failCount = Math.max((this.failCount - 1), 0);
         }
     }
 }
@@ -77,6 +80,16 @@ function buildQuestion(question: StorableQuestionState): DynamicQuestionState {
         get teamB() {
             return state.getById?.<DynamicTeamState>(this._teamB);
         },
+        get winnerTeam() {
+            if (this._winnerTeam) {
+                return state.getById?.<DynamicTeamState>(this._winnerTeam) || null;
+            }
+
+            return null;
+        },
+        get closed() {
+            return !!this.winnerTeam;
+        },
         clear() {
             this.answers.forEach(answer => {
                 answer.reset();
@@ -84,6 +97,13 @@ function buildQuestion(question: StorableQuestionState): DynamicQuestionState {
             Object.values(this.fails).forEach(fail => {
                 fail.failCount = 0;
             });
+            this.winnerTeam?.addPoints(this.pointsWon * -1);
+            this._winnerTeam = null;
+        },
+        win(teamId: WithID["id"], points: number) {
+            this._winnerTeam = teamId;
+            this.pointsWon = points;
+            this.winnerTeam?.addPoints(points);
         }
     }
 }
@@ -116,7 +136,7 @@ function buildTeam(team: StorableTeamState): DynamicTeamState {
             return trimmedName;
         },
         addPoints(amount: number) {
-            this.points = this.points + amount;
+            this.points = Math.max(this.points + amount, 0);
         }
     }
 }
@@ -167,14 +187,12 @@ function buildGameStateFromJSON(inputState: StorableGameState): DynamicGameState
         teams: inputState.teams.map(team => buildTeam(team)),
         questions: inputState.questions.map(question => buildQuestion(question)),
         get ranking() {
-            return this.teams.sort((a, b) => b.points - a.points);
+            return this.teams.toSorted((a, b) => b.points - a.points);
         },
         prevQuestion() {
-            (this.questions[this.activeQuestion] as DynamicQuestionState).clear();
             this.activeQuestion = this.activeQuestion <= 0 ? 0 : this.activeQuestion - 1;
         },
         nextQuestion() {
-            (this.questions[this.activeQuestion] as DynamicQuestionState).clear();
             this.activeQuestion = this.activeQuestion >= this.questions.length - 1 ? this.questions.length - 1 : this.activeQuestion + 1;
         },
         getById<T extends WithID>(id: T["id"]): T | undefined {
@@ -221,7 +239,9 @@ function buildDefaultGameState(): DynamicGameState {
                     { id: getStateId("answer"), solution: "Schlitten", points: 79, open: false },
                     { id: getStateId("answer"), solution: "Pferd", points: 69, open: true },
                     { id: getStateId("answer"), solution: "Jetpack mit Festbrennstoffraketen-Antrieb", points: 59, open: false }
-                ]
+                ],
+                _winnerTeam: null,
+                pointsWon: 0,
             },
             {
                 id: getStateId("question"),
@@ -244,7 +264,9 @@ function buildDefaultGameState(): DynamicGameState {
                     { id: getStateId("answer"), solution: "Ohne Hose rumlaufen", points: 42, open: false },
                     { id: getStateId("answer"), solution: "Pferd", points: 33, open: false },
                     { id: getStateId("answer"), solution: "Wäsche machen / Putzen", points: 24, open: false }
-                ]
+                ],
+                _winnerTeam: null,
+                pointsWon: 0,
             }
         ]
     });
@@ -350,6 +372,4 @@ export function initGameState(id: string = "game") {
         const newState = deepMergeGameState(state, JSON.parse(newValue));
         console.log(newState);
     });
-
-    window["state"] = state;
 }

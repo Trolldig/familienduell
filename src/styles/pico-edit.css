@@ -1,0 +1,43 @@
+article hgroup {
+    --pico-typography-spacing-vertical: 0;
+}
+
+article :is(h1, h2, h3, h4, h5, h6) {
+    --pico-font-size: 1.1rem;
+}
+
+td>select:last-child {
+    --pico-spacing: 0;
+}
+
+details>summary {
+    position: relative;
+    padding-inline-end: calc(1rem + var(--pico-spacing));
+}
+
+details>summary::after {
+    position: absolute;
+    float: none;
+    margin: 0;
+    inset-inline-end: 0;
+    inset-block-start: calc(50% - 0.5rem);
+}
+
+article>details {
+    margin: 0;
+}
+
+fieldset:last-child {
+    margin-bottom: 0;
+}
+
+table:last-child {
+    margin-bottom: 0;
+}
+
+tfoot [type="button"] {
+    --pico-font-weight: 400;
+    --pico-form-element-spacing-vertical: 0.25rem;
+    --pico-form-element-spacing-horizontal: 0.5rem;
+    font-size: 0.7rem;
+}

@@ -6,16 +6,341 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Familienduell</title>
         <link rel="stylesheet" href="/node_modules/normalize.css/normalize.css" />
-        <link rel="stylesheet" href="/src/styles/fonts.css" />
-        <link rel="stylesheet" href="/src/styles/style.css" />
+        <link rel="stylesheet" href="/node_modules/@picocss/pico/css/pico.violet.min.css" />
+        <link rel="stylesheet" href="/src/styles/pico-edit.css" />
     </head>
 
     <body>
-        <div class="bg" x-data="$store.game">
-            <div class="monitor">
-                stay tuned
-            </div>
-        </div>
+        <header class="container">
+            <h1>Controller</h1>
+        </header>
+        <main class="container" x-data="controller($store.game)">
+            <form>
+                <div class="grid">
+                    <article>
+                        <header id="view">
+                            <hgroup>
+                                <h2>Game view</h2>
+                                <p><small>Switch between question mode and highscore.</small></p>
+                            </hgroup>
+                        </header>
+                        <fieldset aria-labelledby="view">
+                            <input type="radio" name="game-view" id="view-question" x-model="view" value="questions">
+                            <label for="view-question">Question mode</label>
+                            <input type="radio" name="game-view" id="view-highscore" x-model="view" value="highscore">
+                            <label for="view-highscore">Highscore mode</label>
+                        </fieldset>
+                    </article>
+                    <article>
+                        <header id="progress">
+                            <hgroup>
+                                <h2>Game progress</h2>
+                                <p><small>See how the game has progressed.</small></p>
+                            </hgroup>
+                        </header>
+                        <fieldset aria-labelledby="progress">
+                            <label for="progress-questions">Questions progress: <span
+                                    x-text="progress.questions.value"></span> / <span
+                                    x-text="progress.questions.max"></span></label>
+                            <progress min="0" x-bind:max="progress.questions.max - 1" value="0"
+                                x-bind:value="progress.questions.value - 1" id="progress-questions"></progress>
+
+                            <label for="progress-question-answers">Total points awarded: <span
+                                    x-text="progress.points.total.value"></span> /
+                                <span x-text="progress.points.total.max"></span></label>
+                            <progress min="0" x-bind:max="progress.points.total.max" value="0"
+                                x-bind:value="progress.points.total.value"></progress>
+                        </fieldset>
+                    </article>
+                </div>
+                <div class="grid">
+                    <article>
+                        <details>
+                            <summary>
+                                <header id="plan">
+                                    <hgroup>
+                                        <h2>Game plan</h2>
+                                        <p><small>Change the teams for each question.</small></p>
+                                    </hgroup>
+                                </header>
+                            </summary>
+                            <fieldset aria-labelledby="plan">
+                                <table class="overflow-auto">
+                                    <thead>
+                                        <tr>
+                                            <th>Question</th>
+                                            <th>Team A</th>
+                                            <th>Team B</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template x-for="(question, index) in plan">
+                                            <tr x-data="question">
+                                                <td x-text="index + 1"></td>
+                                                <td>
+                                                    <select x-model="question.teamA.id">
+                                                        <template x-for="team in teams" x-bind:key="team.id">
+                                                            <option x-bind:value="team.id" x-text="team.name"
+                                                                x-bind:disabled="team.id === question.teamB.id"
+                                                                x-bind:selected="team.id === question.teamA.id">
+                                                            </option>
+                                                        </template>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <select x-model="question.teamB.id">
+                                                        <template x-for="team in teams" x-bind:key="team.id">
+                                                            <option x-bind:value="team.id" x-text="team.name"
+                                                                x-bind:disabled="team.id === question.teamA.id"
+                                                                x-bind:selected="team.id === question.teamB.id">
+                                                            </option>
+                                                        </template>
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </fieldset>
+                        </details>
+                    </article>
+                </div>
+                <div class="grid">
+                    <article>
+                        <details>
+                            <summary>
+                                <header id="highscore">
+                                    <hgroup>
+                                        <h2>Highscore</h2>
+                                        <p><small>See how the teams compete against each other.</small></p>
+                                    </hgroup>
+                                </header>
+                            </summary>
+                            <fieldset aria-labelledby="highscore">
+                                <table class="overflow-auto">
+                                    <thead>
+                                        <tr>
+                                            <th>Position</th>
+                                            <th>Team</th>
+                                            <th>Points</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template x-for="(team, index) in rankedTeams" x-bind:key="team.id">
+                                            <tr>
+                                                <td x-text="index + 1"></td>
+                                                <td x-text="team.name"></td>
+                                                <td x-text="team.points"></td>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </fieldset>
+                        </details>
+                    </article>
+                </div>
+                <div class="grid">
+                    <article>
+                        <header id="control">
+                            <hgroup>
+                                <h2>Question control area</h2>
+                                <p><small>Control the game here.</small></p>
+                            </hgroup>
+                        </header>
+                        <fieldset aria-labelledby="control">
+                            <table class="overflow-auto">
+                                <thead>
+                                    <tr>
+                                        <th scope="row">Question</th>
+                                        <td colspan="3" x-text="currentQuestion.text"></td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="col">No.</th>
+                                        <th scope="col">Revealed</th>
+                                        <th scope="col">Answer</th>
+                                        <th scope="col">Points</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template x-for="(answer, index) in currentQuestion.answers" x-bind:key="answer.id">
+                                        <tr>
+                                            <td x-text="index + 1"></td>
+                                            <td><input name="revealed" type="checkbox" role="switch"
+                                                    x-model="answer.open" x-bind:disabled="currentQuestion.closed" />
+                                            </td>
+                                            <td x-text="answer.solution"></td>
+                                            <td x-text="answer.points"></td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th scope="row">Points</th>
+                                        <td x-text="currentQuestion.pointsToWin"></td>
+                                        <td>
+                                            <progress min="0" x-bind:max="currentQuestion.maximumPoints" value="0"
+                                                x-bind:value="currentQuestion.pointsToWin"></progress>
+                                        </td>
+                                        <td x-text="currentQuestion.maximumPoints"></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            <table class="overflow-auto">
+                                <thead>
+                                    <tr>
+                                        <td></td>
+                                        <th colspan="2" scope="colgroup">Team A</th>
+                                        <th colspan="2" scope="colgroup">Team B</th>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">Fails</th>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">Fails</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td></td>
+                                        <th scope="row" x-text="currentQuestion.teamA.name"></th>
+                                        <td>
+                                            <label for="fails-teamA"><span
+                                                    x-text="currentQuestion.fails.teamA.failCount"></span> / 3</label>
+                                            <progress id="fails-teamA" min="0" max="3" value="0"
+                                                x-bind:value="currentQuestion.fails.teamA.failCount"></progress>
+                                        </td>
+                                        <th scope="row" x-text="currentQuestion.teamB.name"></th>
+                                        <td>
+                                            <label for="fails-teamB"><span
+                                                    x-text="currentQuestion.fails.teamB.failCount"></span> / 3</label>
+                                            <progress id="fails-teamB" min="0" max="3" value="0"
+                                                x-bind:value="currentQuestion.fails.teamB.failCount"></progress>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th scope="row">Actions</th>
+                                        <td colspan="2">
+                                            <div role="group">
+                                                <button type="button" class="secondary"
+                                                    x-on:click="currentQuestion.win(currentQuestion._teamA, currentQuestion.pointsToWin)"
+                                                    x-bind:disabled="currentQuestion.closed">
+                                                    Win this question
+                                                </button>
+                                                <button type="button" class="secondary"
+                                                    x-bind:disabled="currentQuestion.closed"
+                                                    x-on:click="currentQuestion.fails.teamA.increase()">
+                                                    Add fail
+                                                </button>
+                                                </button>
+                                                <button type="button" class="secondary"
+                                                    x-bind:disabled="currentQuestion.closed"
+                                                    x-on:click="currentQuestion.fails.teamA.decrease()">
+                                                    Remove fail
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td colspan="2">
+                                            <div role="group">
+                                                <button type="button" class="secondary"
+                                                    x-on:click="currentQuestion.win(currentQuestion._teamB, currentQuestion.pointsToWin)"
+                                                    x-bind:disabled="currentQuestion.closed">
+                                                    Win this question
+                                                </button>
+                                                <button type="button" class="secondary"
+                                                    x-bind:disabled="currentQuestion.closed"
+                                                    x-on:click="currentQuestion.fails.teamB.increase()">
+                                                    Add fail
+                                                </button>
+                                                <button type="button" class="secondary"
+                                                    x-bind:disabled="currentQuestion.closed"
+                                                    x-on:click="currentQuestion.fails.teamB.decrease()">
+                                                    Remove fail
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            <div class="grid">
+                                <article>
+                                    <details open>
+                                        <summary>
+                                            <header>
+                                                <hgroup>
+                                                    <h3>Question selection</h2>
+                                                </hgroup>
+                                            </header>
+                                        </summary>
+                                        <div x-if="!currentQuestion.closed">
+                                            <blockquote>⚠ You should select a winner first!</blockquote>
+                                        </div>
+                                        <div class="grid">
+                                            <button type="button" x-on:click="nextQuestion()">
+                                                Next question
+                                            </button>
+                                            <button type="button" class="secondary" x-on:click="prevQuestion()">
+                                                Previous question
+                                            </button>
+                                        </div>
+                                    </details>
+                                </article>
+                                <article>
+                                    <details>
+                                        <summary>
+                                            <header>
+                                                <hgroup>
+                                                    <h3>Danger zone</h3>
+                                                </hgroup>
+                                            </header>
+                                        </summary>
+                                        <label>
+                                            <input name="closed" type="checkbox" role="switch" disabled
+                                                x-bind:value="currentQuestion.closed" />
+                                            Question is closed (read-only)
+                                        </label>
+                                        <hr>
+                                        <label for="winner">Winner</label>
+                                        <select id="winner" x-model="currentQuestion._winnerTeam"
+                                            x-bind:disabled="currentQuestion._winnerTeam !== null"
+                                            x-on:change="currentQuestion.win($el.value, currentQuestion.pointsToWin)">
+                                            <option value="" selected>No winner</option>
+                                            <template x-for="team in teams" x-bind:key="team.id">
+                                                <option x-bind:value="team.id" x-text="team.name"
+                                                    x-bind:selected="team.id === currentQuestion._winnerTeam">
+                                                </option>
+                                            </template>
+                                        </select>
+                                        <hr>
+                                        <button type="button" x-on:click="currentQuestion.clear()">Reset
+                                            question</button>
+                                    </details>
+                                </article>
+                            </div>
+                        </fieldset>
+                    </article>
+                </div>
+                <div class="grid">
+                    <article>
+                        <details>
+                            <summary>
+                                <header id="critical">
+                                    <hgroup>
+                                        <h2>Critical actions</h2>
+                                        <p><small>Use these actions carefully.</small></p>
+                                    </hgroup>
+                                </header>
+                            </summary>
+                            <fieldset aria-labelledby="critical">
+                                <button type="button" x-on:click="deleteGame()">Delete entire game</button>
+                            </fieldset>
+                        </details>
+                    </article>
+                </div>
+            </form>
+        </main>
         <script type="module" src="/src/scripts/main.ts"></script>
     </body>
 

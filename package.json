@@ -16,6 +16,7 @@
     "vituum": "^1.1.0"
   },
   "dependencies": {
+    "@picocss/pico": "^2.0.6",
     "alpinejs": "^3.13.10",
     "normalize.css": "^8.0.1"
   }

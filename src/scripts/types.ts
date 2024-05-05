@@ -33,7 +33,8 @@ export interface StorableFailState extends WithID {
 }
 
 export interface DynamicFailState extends StorableFailState {
-    increase(): Promise<void>
+    increase(): Promise<void>;
+    decrease(): void;
 }
 
 export interface StorableQuestionState extends WithID {
@@ -45,6 +46,8 @@ export interface StorableQuestionState extends WithID {
     };
     _teamA: WithID["id"];
     _teamB: WithID["id"];
+    _winnerTeam: WithID["id"] | null;
+    pointsWon: number;
 }
 
 export interface DynamicQuestionState extends StorableQuestionState {
@@ -57,7 +60,10 @@ export interface DynamicQuestionState extends StorableQuestionState {
     readonly maximumPoints: number;
     readonly teamA?: DynamicTeamState;
     readonly teamB?: DynamicTeamState;
+    readonly winnerTeam: DynamicTeamState | null;
+    readonly closed: boolean;
     clear(): void;
+    win(teamId: WithID["id"], points: number): void;
 }
 
 export interface StorableGameState extends WithID {

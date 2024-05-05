@@ -49,6 +49,10 @@ class StorageAPI {
             callback({ key, oldValue, newValue });
         });
     }
+
+    delete(key: string) {
+        localStorage.removeItem(key);
+    }
 }
 
 export const storage = new StorageAPI();
