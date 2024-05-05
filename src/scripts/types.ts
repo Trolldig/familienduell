@@ -1,4 +1,4 @@
-interface WithID {
+export interface WithID {
     id: string;
 }
 
@@ -63,4 +63,5 @@ export interface StorableGameState extends WithID {
 export interface DynamicGameState extends StorableGameState {
     prevQuestion(): void;
     nextQuestion(): void;
+    getById<T extends WithID>(id: WithID["id"]): T | undefined;
 }

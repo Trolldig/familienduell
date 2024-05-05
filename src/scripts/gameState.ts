@@ -1,7 +1,7 @@
 import { playAudio } from "./audio";
 import { getStateId } from "./stateIdGenerator";
 import Alpine from "alpinejs";
-import type { DynamicAnswerState, DynamicFailState, DynamicGameState, DynamicQuestionState, DynamicTeamState, StorableAnswerState, StorableFailState, StorableGameState, StorableQuestionState, StorableTeamState } from "./types";
+import type { DynamicAnswerState, DynamicFailState, DynamicGameState, DynamicQuestionState, DynamicTeamState, StorableAnswerState, StorableFailState, StorableGameState, StorableQuestionState, StorableTeamState, WithID } from "./types";
 import { storage } from "./storage";
 
 function buildAnswer(answer: StorableAnswerState): DynamicAnswerState {
@@ -119,6 +119,33 @@ function buildGameStateFromJSON(inputState: StorableGameState): DynamicGameState
         nextQuestion() {
             (this.questions[this.activeQuestion] as DynamicQuestionState).clear();
             this.activeQuestion = this.activeQuestion >= this.questions.length - 1 ? this.questions.length - 1 : this.activeQuestion + 1;
+        },
+        getById<T extends WithID>(id: T["id"]): T | undefined {
+            const find = (haystack: T, needle: T["id"]): T | undefined => {
+                if (haystack.id === needle) {
+                    return haystack;
+                }
+
+                for (const value of Object.values(haystack) as (T | T[])[]) {
+                    let result;
+
+                    if (Array.isArray(value)) {
+                        result = value.find((arrEl) => {
+                            return find(arrEl, id);
+                        })
+                    } else if (typeof value === "object") {
+                        result = find(value, id);
+                    }
+
+                    if (result) {
+                        return result;
+                    }
+                }
+
+                return undefined;
+            }
+
+            return find(this as unknown as T, id);
         }
     }
 }
