@@ -91,6 +91,16 @@ function buildQuestion(question: StorableQuestionState): DynamicQuestionState {
 function buildTeam(team: StorableTeamState): DynamicTeamState {
     return {
         ...team,
+        get pts() {
+            const highestTeamPoints = state.ranking[0].points;
+            const maximumQuestionPoints = state.questions[state.activeQuestion].maximumPoints;
+            const highestReachableTeamPoints = highestTeamPoints + maximumQuestionPoints;
+            const highestPointsLength = highestReachableTeamPoints.toString().length;
+            const teamPointsLength = this.points.toString().length;
+            const prefix = "0";
+
+            return prefix.repeat(highestPointsLength - teamPointsLength) + this.points.toString();
+        },
         addPoints(amount: number) {
             this.points = this.points + amount;
         }
@@ -142,6 +152,9 @@ function buildGameStateFromJSON(inputState: StorableGameState): DynamicGameState
         ...inputState,
         teams: inputState.teams.map(team => buildTeam(team)),
         questions: inputState.questions.map(question => buildQuestion(question)),
+        get ranking() {
+            return this.teams.sort((a, b) => b.points - a.points);
+        },
         prevQuestion() {
             (this.questions[this.activeQuestion] as DynamicQuestionState).clear();
             this.activeQuestion = this.activeQuestion <= 0 ? 0 : this.activeQuestion - 1;

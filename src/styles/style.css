@@ -156,7 +156,7 @@ ul {
   background: #909b08;
   color: #121212;
   display: flex;
-  justify-content: space-evenly;
+  justify-content: space-between;
   width: 100%;
   white-space: pre;
 }

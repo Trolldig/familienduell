@@ -8,6 +8,7 @@ export interface StorableTeamState extends WithID {
 }
 
 export interface DynamicTeamState extends StorableTeamState {
+    readonly pts: string;
     addPoints(amount: number): void;
 }
 
@@ -65,6 +66,8 @@ export interface StorableGameState extends WithID {
 }
 
 export interface DynamicGameState extends StorableGameState {
+    questions: DynamicQuestionState[];
+    readonly ranking: StorableTeamState[];
     prevQuestion(): void;
     nextQuestion(): void;
     getById<T extends WithID>(id: WithID["id"]): T | undefined;

@@ -27,7 +27,9 @@
                             </template>
                         </ul>
                         <div class="points-overview">
+                            <span x-reveal="{ text: teamA.pts }"></span>
                             <span x-reveal="{ text: pointsToWinAsString, delay: 45 }"></span>
+                            <span x-reveal="{ text: teamB.pts }"></span>
                         </div>
                         <div class="controls left" x-data="fails.teamA">
                             <ul class="list fail-list">
