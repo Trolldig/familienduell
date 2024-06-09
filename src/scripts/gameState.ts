@@ -45,7 +45,7 @@ function buildFailsCount(failsCount: StorableFailState): DynamicFailState {
         ...failsCount,
         async increase() {
             this.failCount = Math.min((this.failCount + 1), 3);
-            await playAudio("fail.mp3");
+            await playAudio("fail.mp.3");
         },
         decrease() {
             this.failCount = Math.max((this.failCount - 1), 0);

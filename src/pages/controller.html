@@ -231,7 +231,7 @@
                                                 </button>
                                                 <button type="button" class="secondary"
                                                     x-bind:disabled="currentQuestion.closed"
-                                                    x-on:click="currentQuestion.fails.teamA.increase()">
+                                                    x-on:click="if (currentQuestion.fails.teamA.failCount != 3) { currentQuestion.fails.teamA.increase() }">
                                                     Add fail
                                                 </button>
                                                 </button>
@@ -251,7 +251,7 @@
                                                 </button>
                                                 <button type="button" class="secondary"
                                                     x-bind:disabled="currentQuestion.closed"
-                                                    x-on:click="currentQuestion.fails.teamB.increase()">
+                                                    x-on:click="if (currentQuestion.fails.teamA.failCount != 3) { currentQuestion.fails.teamB.increase() }">
                                                     Add fail
                                                 </button>
                                                 <button type="button" class="secondary"
