@@ -166,7 +166,7 @@
                                         <tr>
                                             <td x-text="index + 1"></td>
                                             <td><input name="revealed" type="checkbox" role="switch"
-                                                x-on:click="answer.reveal()" x-model="answer.open" x-bind:disabled="currentQuestion.closed" />
+                                                x-on:click="if (!answer.open) { answer.reveal() }" x-model="answer.open" x-bind:disabled="currentQuestion.closed" />
                                             </td>
                                             <td x-text="answer.solution"></td>
                                             <td x-text="answer.points"></td>
