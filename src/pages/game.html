@@ -37,12 +37,6 @@
                                 <li x-bind:class="failCount >= 3 ? 'active' : ''">X</li>
                             </ul>
                         </div>
-                        <div class="controls middle">
-                            <span x-bind:class="qIndex === 0 ? 'inactive' : 'active'">prev</span>
-                            <span x-bind:class="qIndex >= questions.length - 1 ? 'inactive' : 'active'">next</span>
-                            <button class="increase" aria-label="previous question" @click="prevQuestion"></button>
-                            <button class="increase right" aria-label="next question" @click="nextQuestion"></button>
-                        </div>
                         <div class="controls right" x-data="fails.teamB">
                             <ul class="list fail-list right" @click="increase">
                                 <li x-bind:class="failCount >= 1 ? 'active' : ''">X</li>

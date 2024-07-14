@@ -223,7 +223,7 @@ function buildDefaultGameState(): DynamicGameState {
         questions: [
             {
                 id: getStateId("question"),
-                text: "Nennen Sie ein Fortbewegungsmittel ohne Räder",
+                text: "Nennen Sie die Regeln des Babilienduells",
                 fails: {
                     teamA: {
                         id: getStateId("fail"),
@@ -237,18 +237,19 @@ function buildDefaultGameState(): DynamicGameState {
                 _teamA: teamAId,
                 _teamB: teamBId,
                 answers: [
-                    { id: getStateId("answer"), solution: "Boot", points: 99, open: false },
-                    { id: getStateId("answer"), solution: "Helikopter", points: 89, open: false },
-                    { id: getStateId("answer"), solution: "Schlitten", points: 79, open: false },
-                    { id: getStateId("answer"), solution: "Pferd", points: 69, open: true },
-                    { id: getStateId("answer"), solution: "Jetpack mit Festbrennstoffraketen-Antrieb", points: 59, open: false }
+                    { id: getStateId("answer"), solution: "Top 6 Antworten zu einer Frage gesucht", points: 60, open: true },
+                    { id: getStateId("answer"), solution: "Buzzerduell entscheidet Startteam", points: 20, open: false },
+                    { id: getStateId("answer"), solution: "Falsche Antworten geben 1x", points: 10, open: false },
+                    { id: getStateId("answer"), solution: "Ab 2X darf der Gegner beraten", points: 5, open: false },
+                    { id: getStateId("answer"), solution: "Ab 3X darf der Gegner 1x abstauben", points: 3, open: false },
+                    { id: getStateId("answer"), solution: "Gewinnerteam bekommt alle Punkte", points: 2, open: false }
                 ],
                 _winnerTeam: null,
                 pointsWon: 0,
             },
             {
                 id: getStateId("question"),
-                text: "Nennen Sie etwas, das man im Homeoffice tut",
+                text: "Nennen Sie die Regeln des Finales",
                 fails: {
                     teamA: {
                         id: getStateId("fail"),
@@ -262,11 +263,10 @@ function buildDefaultGameState(): DynamicGameState {
                 _teamA: teamAId,
                 _teamB: teamBId,
                 answers: [
-                    { id: getStateId("answer"), solution: "Schlafen", points: 60, open: false },
-                    { id: getStateId("answer"), solution: "Arbeiten", points: 51, open: false },
-                    { id: getStateId("answer"), solution: "Ohne Hose rumlaufen", points: 42, open: false },
-                    { id: getStateId("answer"), solution: "Pferd", points: 33, open: false },
-                    { id: getStateId("answer"), solution: "Wäsche machen / Putzen", points: 24, open: false }
+                    { id: getStateId("answer"), solution: "5 Fragen im Schnelldurchlauf", points: 60, open: true },
+                    { id: getStateId("answer"), solution: "Nur ein Spieler gibt die Antworten", points: 20, open: false },
+                    { id: getStateId("answer"), solution: "Es gibt ein Zeitlimit", points: 15, open: false },
+                    { id: getStateId("answer"), solution: "Punkte werden in Bonuszeit umgewandelt", points: 5, open: false }
                 ],
                 _winnerTeam: null,
                 pointsWon: 0,
